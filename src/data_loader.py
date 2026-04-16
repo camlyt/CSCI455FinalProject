@@ -1,7 +1,3 @@
-import json
-from pathlib import Path
-from typing import List, Dict, Any
-
 """
 This module handles loading and basic inspection of the FEVER dataset.
 
@@ -18,6 +14,10 @@ Main responsibilities:
 This file does NOT modify or clean the data. It is only responsible for
 reading raw data from disk.
 """
+
+import json
+from pathlib import Path
+from typing import List, Dict, Any
 
 def load_jsonl(file_path: str) -> List[Dict[str, Any]]:
     """

@@ -1,6 +1,3 @@
-from typing import Any, Dict, List
-from src.data_loader import load_jsonl
-
 """
 This module handles preprocessing and normalization of the FEVER dataset.
 
@@ -20,6 +17,10 @@ This prepares the data for later steps such as:
     - retrieval evaluation
     - matching against Wikipedia sentence corpus
 """
+
+
+from typing import Any, Dict, List
+from src.data_loader import load_jsonl
 
 def normalize_evidence(evidence: List[List[List[Any]]]) -> List[List[Dict[str, Any]]]:
     """
