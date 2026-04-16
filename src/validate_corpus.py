@@ -52,9 +52,14 @@ def validate_examples(train_path: str, corpus_keys: Set[Tuple[str, int]], num_ex
 
     total_refs = 0
     matched_refs = 0
+    skipped_examples = 0
 
     for raw_example in train_data[:num_examples]:
         example = normalize_example(raw_example)
+
+        if not example["evidence_sets"]:
+            skipped_examples += 1
+            continue
 
         for evidence_set in example["evidence_sets"]:
             for item in evidence_set:
@@ -69,6 +74,7 @@ def validate_examples(train_path: str, corpus_keys: Set[Tuple[str, int]], num_ex
                     print()
 
     print(f"Checked {num_examples} examples")
+    print(f"Skipped examples with no usable evidence: {skipped_examples}")
     print(f"Matched evidence refs: {matched_refs}/{total_refs}")
 
 

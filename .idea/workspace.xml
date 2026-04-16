@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="923efb22-b85d-4349-9a61-445dc4ced44a" name="Changes" comment="Implement preprocess.py">
-      <change afterPath="$PROJECT_DIR$/src/inspect_wiki.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/validate_corpus.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/wiki_preprocess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data_loader.py" afterDir="false" />
+    <list default="true" id="923efb22-b85d-4349-9a61-445dc4ced44a" name="Changes" comment="Implement Wiki Sentence Corpus">
       <change beforePath="$PROJECT_DIR$/src/preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocess.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/validate_corpus.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/validate_corpus.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -237,13 +233,22 @@
       <option name="project" value="LOCAL" />
       <updated>1776369334993</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Implement Wiki Sentence Corpus">
+      <option name="closed" value="true" />
+      <created>1776374898737</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1776374898737</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial Commit" />
     <MESSAGE value="Implement data_loader.py and Add README" />
     <MESSAGE value="Implement preprocess.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement preprocess.py" />
+    <MESSAGE value="Implement Wiki Sentence Corpus" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement Wiki Sentence Corpus" />
   </component>
 </project>

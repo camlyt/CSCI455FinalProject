@@ -24,7 +24,7 @@ from src.data_loader import load_jsonl
 
 def normalize_evidence(evidence: List[List[List[Any]]]) -> List[List[Dict[str, Any]]]:
     """
-    Convert FEVER's nested evidence format into a cleaner structure.
+    Convert raw FEVER evidence into a cleaner format.
 
     Raw structure:
         [[[annotation_id, evidence_id, page, sentence_id], ...], ...]
@@ -39,11 +39,11 @@ def normalize_evidence(evidence: List[List[List[Any]]]) -> List[List[Dict[str, A
         ]
 
     Args:
-        evidence: Raw FEVER evidence field.
+        evidence: Raw evidence field from FEVER.
 
     Returns:
-        A list of evidence sets. Each evidence set is a list of dictionaries
-        containing page title and sentence index.
+        A list of evidence sets, where each set contains dictionaries
+        with page title and sentence index.
     """
     normalized_sets = []
 
@@ -51,11 +51,19 @@ def normalize_evidence(evidence: List[List[List[Any]]]) -> List[List[Dict[str, A
         cleaned_set = []
 
         for item in evidence_set:
-            if len(item) >= 4:
-                cleaned_set.append({
-                    "page": item[2],
-                    "sentence_id": item[3]
-                })
+            if len(item) < 4:
+                continue
+
+            page = item[2]
+            sentence_id = item[3]
+
+            if page is None or sentence_id is None:
+                continue
+
+            cleaned_set.append({
+                "page": page,
+                "sentence_id": sentence_id
+            })
 
         if cleaned_set:
             normalized_sets.append(cleaned_set)
