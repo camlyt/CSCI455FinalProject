@@ -1,8 +1,8 @@
 pandas
-numpy
+numpy<2
 scikit-learn
-sentence-transformers
-faiss-cpu
+faiss-cpu==1.8.0
+sentence-transformers==2.7.0
 tqdm
 fastapi
 uvicorn

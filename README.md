@@ -8,4 +8,11 @@ A Retrieval-Augmented Generation (RAG) system for evidence-based claim verificat
 - app/: frontend + backend
 
 ## Setup
+
+1. Create a virtual environment (Python 3.12 recommended)
+
+2. Install PyTorch:
+pip install torch torchvision torchaudio
+
+3. Install project dependencies:
 pip install -r requirements.txt
