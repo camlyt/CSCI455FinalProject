@@ -1,4 +1,4 @@
-# Claim Verification RAG
+# Fact Verification System
 
 A Retrieval-Augmented Generation (RAG) system for evidence-based claim verification using the FEVER dataset.
 
