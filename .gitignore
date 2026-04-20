@@ -15,7 +15,7 @@ venv/
 # Mac
 .DS_Store
 
-# Data (important for your project)
+# Data
 data/raw/
 data/processed/
 data/index/
