@@ -28,14 +28,19 @@ def load_corpus_keys(corpus_path: str, limit: int | None = None) -> Set[Tuple[st
     keys = set()
     path = Path(corpus_path)
 
+    print("Loading corpus...")
+
     with path.open("r", encoding="utf-8") as file:
         for i, line in enumerate(file):
             if limit is not None and i >= limit:
                 break
+            if i % 100000 == 0 and i > 0:
+                print(f"Loaded {i:,} lines...")
 
             record = json.loads(line)
             keys.add((record["page"], record["sentence_id"]))
-
+            
+    print(f"Finished loading corpus: {len(keys):,} sentences")
     return keys
 
 
@@ -54,7 +59,13 @@ def validate_examples(train_path: str, corpus_keys: Set[Tuple[str, int]], num_ex
     matched_refs = 0
     skipped_examples = 0
 
-    for raw_example in train_data[:num_examples]:
+    # for raw_example in train_data[:num_examples]:
+    #     example = normalize_example(raw_example)
+
+    for idx, raw_example in enumerate(train_data[:num_examples]):
+        if idx % 10 == 0 and idx > 0:
+            print(f"Processed {idx}/{num_examples} examples...")
+
         example = normalize_example(raw_example)
 
         if not example["evidence_sets"]:
