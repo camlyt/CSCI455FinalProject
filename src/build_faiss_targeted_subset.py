@@ -50,7 +50,9 @@ def extract_texts(records: List[Dict[str, Any]]) -> List[str]:
     Returns:
         A list of sentence strings.
     """
-    return [record["text"] for record in records]
+    #return [record["text"] for record in records]
+    return ["passage: " + record["text"] for record in records]
+    
 
 
 def save_metadata(records: List[Dict[str, Any]], output_path: str) -> None:

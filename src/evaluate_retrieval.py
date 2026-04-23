@@ -1,19 +1,3 @@
-"""
-evaluate_retrieval.py
-
-Evaluate retrieval quality using Recall@K.
-
-This version is fully aligned with the project pipeline:
-- Retrieval returns (page, sentence_id)
-- FEVER gold evidence uses (page, sentence_id)
-- Matching is done ONLY on these keys (no text matching)
-
-Metric:
-    Recall@K = % of claims where at least ONE gold evidence sentence
-               appears in top-K retrieved results
-"""
-
-import json
 from typing import List, Dict, Any, Tuple
 
 import faiss
@@ -23,54 +7,26 @@ from src.data_loader import load_jsonl
 from src.preprocess import normalize_example
 from src.query_faiss_targeted_subset import search_claim, load_metadata
 
-# -----------------------------
-# Helper: extract gold evidence keys
-# -----------------------------
 
 def get_gold_keys(example: Dict[str, Any]) -> List[Tuple[str, int]]:
-    """
-    Extract all (page, sentence_id) pairs from FEVER evidence.
-
-    Handles multiple evidence sets.
-    """
     keys = []
-
     for evidence_set in example["evidence_sets"]:
         for item in evidence_set:
             keys.append((item["page"], item["sentence_id"]))
-
     return keys
 
 
-# -----------------------------
-# Core evaluation function
-# -----------------------------
-
 def compute_recall_at_k(
     data: List[Dict[str, Any]],
-    model: SentenceTransformer,
+    model,
     index,
-    metadata: List[Dict[str, Any]],
-    k: int = 5
-) -> float:
-    """
-    Compute Recall@K.
-
-    Args:
-        data: normalized FEVER examples
-        model: embedding model
-        index: FAISS index
-        metadata: corpus metadata
-        k: top-K retrieval
-
-    Returns:
-        recall@k
-    """
+    metadata,
+    k=5
+):
     hits = 0
     total = 0
 
     for example in data:
-        # Skip examples with no evidence (NOT ENOUGH INFO cases)
         if not example["evidence_sets"]:
             continue
 
@@ -85,12 +41,10 @@ def compute_recall_at_k(
             top_k=k
         )
 
-        # Extract retrieved keys
         retrieved_keys = set(
             (r["page"], r["sentence_id"]) for r in results
         )
 
-        # Check if any gold evidence is retrieved
         if any(key in retrieved_keys for key in gold_keys):
             hits += 1
 
@@ -99,12 +53,8 @@ def compute_recall_at_k(
     return hits / total if total > 0 else 0.0
 
 
-# -----------------------------
-# Multi-K evaluation
-# -----------------------------
-
 def evaluate_all_k(data, model, index, metadata):
-    ks = [1, 5, 10]
+    ks = [1, 5, 10, 20, 50, 100]
     results = {}
 
     for k in ks:
@@ -116,13 +66,8 @@ def evaluate_all_k(data, model, index, metadata):
     return results
 
 
-# -----------------------------
-# Main script
-# -----------------------------
-
 if __name__ == "__main__":
 
-    # Paths (aligned with your subset pipeline)
     train_path = "data/raw/train.jsonl"
     index_path = "data/index/wiki_targeted_subset.index"
     metadata_path = "data/index/wiki_targeted_subset_metadata.json"
@@ -132,7 +77,7 @@ if __name__ == "__main__":
     raw_data = load_jsonl(train_path)
 
     print("Normalizing FEVER examples...")
-    data = [normalize_example(ex) for ex in raw_data[:200]]  # limit for speed
+    data = [normalize_example(ex) for ex in raw_data[:200]]
 
     print("Loading model...")
     model = SentenceTransformer(model_name)

@@ -43,31 +43,62 @@ def normalize_vector(vector: np.ndarray) -> np.ndarray:
     return vector / norms
 
 
+# def search_claim(
+#     claim: str,
+#     model: SentenceTransformer,
+#     index: faiss.Index,
+#     metadata: List[Dict[str, Any]],
+#     top_k: int = 5
+# ) -> List[Dict[str, Any]]:
+#     """
+#     Search the FAISS index for the most relevant sentences to a claim.
+
+#     Args:
+#         claim: Input natural language claim.
+#         model: Sentence embedding model.
+#         index: Loaded FAISS index.
+#         metadata: Metadata corresponding to index rows.
+#         top_k: Number of results to return.
+
+#     Returns:
+#         A list of retrieved results with score and sentence metadata.
+#     """
+#     query_embedding = model.encode(["query: " + claim], convert_to_numpy=True)
+#     query_embedding = query_embedding.astype("float32")
+#     query_embedding = normalize_vector(query_embedding)
+
+#     scores, indices = index.search(query_embedding, top_k)
+
+#     results = []
+#     for score, idx in zip(scores[0], indices[0]):
+#         record = metadata[idx]
+#         results.append({
+#             "score": float(score),
+#             "page": record["page"],
+#             "sentence_id": record["sentence_id"],
+#             "text": record["text"]
+#         })
+
+#     return results
 def search_claim(
-    claim: str,
-    model: SentenceTransformer,
-    index: faiss.Index,
-    metadata: List[Dict[str, Any]],
-    top_k: int = 5
-) -> List[Dict[str, Any]]:
+    claim,
+    model,
+    index,
+    metadata,
+    top_k=5
+):
     """
-    Search the FAISS index for the most relevant sentences to a claim.
-
-    Args:
-        claim: Input natural language claim.
-        model: Sentence embedding model.
-        index: Loaded FAISS index.
-        metadata: Metadata corresponding to index rows.
-        top_k: Number of results to return.
-
-    Returns:
-        A list of retrieved results with score and sentence metadata.
+    Simple dense retrieval using FAISS.
     """
-    query_embedding = model.encode([claim], convert_to_numpy=True)
+
+    query_embedding = model.encode(
+        ["query: " + claim],
+        convert_to_numpy=True
+    )
     query_embedding = query_embedding.astype("float32")
     query_embedding = normalize_vector(query_embedding)
 
-    scores, indices = index.search(query_embedding, top_k)
+    scores, indices = index.search(query_embedding, 50)
 
     results = []
     for score, idx in zip(scores[0], indices[0]):
@@ -79,8 +110,10 @@ def search_claim(
             "text": record["text"]
         })
 
-    return results
+    # sort just in case
+    results = sorted(results, key=lambda x: x["score"], reverse=True)
 
+    return results[:top_k]
 
 if __name__ == "__main__":
     index_path = "data/index/wiki_targeted_subset.index"
