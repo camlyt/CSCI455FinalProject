@@ -85,10 +85,11 @@ def search_claim(
     model,
     index,
     metadata,
+    reranker,
     top_k=5
 ):
     """
-    Simple dense retrieval using FAISS.
+    Dense retrieval + reranking
     """
 
     query_embedding = model.encode(
@@ -98,22 +99,23 @@ def search_claim(
     query_embedding = query_embedding.astype("float32")
     query_embedding = normalize_vector(query_embedding)
 
+    # retrieve more candidates for reranking
     scores, indices = index.search(query_embedding, 50)
 
-    results = []
+    candidates = []
     for score, idx in zip(scores[0], indices[0]):
         record = metadata[idx]
-        results.append({
+        candidates.append({
             "score": float(score),
             "page": record["page"],
             "sentence_id": record["sentence_id"],
             "text": record["text"]
         })
 
-    # sort just in case
-    results = sorted(results, key=lambda x: x["score"], reverse=True)
+    # rerank candidates
+    reranked = reranker.rerank(claim, candidates, top_k=top_k)
 
-    return results[:top_k]
+    return reranked
 
 if __name__ == "__main__":
     index_path = "data/index/wiki_targeted_subset.index"
