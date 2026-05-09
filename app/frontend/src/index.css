@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Outfit", sans-serif;
+
+  --color-supports: #10b981;
+  --color-refutes: #ef4444;
+  --color-nei: #6b7280;
+
+  /* Permanent Dark Theme Variables */
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #38bdf8;
+  --border-color: #1e293b;
+  --card-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    @apply antialiased selection:bg-sky-500/30;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen text-slate-50;
+  }
+
+  .dashboard-header {
+    background-color: rgba(2, 6, 23, 0.8);
+    border-color: var(--border-color);
+    @apply sticky top-0 z-50 backdrop-blur-md border-b px-8 py-4 mb-8 flex items-center justify-between;
+  }
+
+  .claim-input {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+    @apply w-full p-6 rounded-2xl border shadow-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all outline-hidden text-xl resize-none min-h-[160px] placeholder:text-slate-600;
+  }
+
+  .verify-button {
+    @apply px-10 py-4 bg-sky-500 text-slate-950 rounded-xl font-bold uppercase tracking-widest hover:bg-sky-400 active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .result-card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    box-shadow: var(--card-shadow);
+    @apply p-10 rounded-3xl border transition-all;
+  }
+
+  .result-label {
+    @apply inline-flex items-center px-6 py-2 rounded-full text-base font-black uppercase tracking-tighter;
+  }
+
+  .label-supports {
+    @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+  }
+
+  .label-refutes {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+
+  .label-nei {
+    @apply bg-slate-500/20 text-slate-400 border border-slate-500/30;
+  }
+
+  .confidence-score {
+    @apply font-mono text-5xl font-extralight tracking-tighter text-sky-400;
+  }
+
+  .evidence-card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    @apply p-8 rounded-2xl border transition-all hover:translate-y-[-4px] hover:shadow-xl hover:border-slate-700;
+  }
+
+  .evidence-highlight {
+    @apply bg-sky-500/20 px-1 py-0.5 rounded font-medium text-sky-300;
+  }
+
+  .score-bar-container {
+    @apply w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1;
+  }
+
+  .score-bar-fill {
+    @apply h-full bg-sky-500 shadow-[0_0_8px_rgba(56,189,248,0.5)];
+  }
+
+  /* Advanced Settings Components */
+  .advanced-settings {
+    @apply mt-16 border rounded-3xl overflow-hidden;
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+  }
+
+  .settings-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-12 p-10;
+  }
+
+  .setting-card {
+    @apply space-y-4;
+  }
+
+  .model-card {
+    background-color: rgba(2, 6, 23, 0.3);
+    border-color: var(--border-color);
+    @apply cursor-pointer p-4 border-2 rounded-xl transition-all hover:bg-slate-800 text-left;
+  }
+
+  .model-card.active {
+    @apply bg-sky-500 text-slate-950 border-sky-500;
+  }
+  
+  /* Analytics Page */
+  .analytics-page {
+    @apply py-12 space-y-12;
+  }
+
+  .metric-card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    @apply p-8 rounded-2xl border shadow-sm flex flex-col justify-between;
+  }
+
+  .heatmap-grid {
+    @apply grid gap-1 mt-6;
+  }
+
+  .heatmap-cell {
+    @apply w-12 h-12 rounded-sm flex items-center justify-center text-[10px] font-mono transition-opacity;
+  }
+
+  /* Tutorial Section */
+  .tutorial-section {
+    @apply py-20 space-y-32;
+  }
+
+  .pipeline-step {
+    @apply flex flex-col md:flex-row gap-12 items-center;
+  }
+
+  .pipeline-card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    @apply flex-1 p-10 rounded-3xl border shadow-xl relative z-10;
+  }
+
+  .pipeline-timeline {
+    @apply absolute left-1/2 top-0 bottom-0 w-px bg-slate-800 -z-10 hidden md:block;
+  }
+}

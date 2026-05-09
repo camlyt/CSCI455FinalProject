@@ -16,3 +16,11 @@ pip install torch torchvision torchaudio
 
 3. Install project dependencies:
 pip install -r requirements.txt
+
+
+## Launch UI
+cd app/frontend
+npm install
+npm run dev
+
+The Website will run on:   http://localhost:3000/
