@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { History, Zap, CheckCircle2, CheckCircle, ExternalLink, BrainCircuit } from 'lucide-react';
-import { MOCK_PREVIOUS_CLAIMS, MOCK_EVIDENCE } from '../constants';
+import { MOCK_PREVIOUS_CLAIMS } from '../constants';
 import { AppSettings } from '../types';
 
 interface VerifyPageProps {
   isVerifying: boolean;
-  handleVerify: () => void;
+  handleVerify: (claim: string) => void;
   showResult: boolean;
   settings: AppSettings;
+  result: any;
+  error: string | null;
 }
 
-export const VerifyPage = ({ isVerifying, handleVerify, showResult, settings }: VerifyPageProps) => {
+export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, result, error}: VerifyPageProps) => {
   const [claimText, setClaimText] = useState("Roman Atwood is a content creator.");
   
   return (
@@ -46,6 +48,13 @@ export const VerifyPage = ({ isVerifying, handleVerify, showResult, settings }: 
       {/* Main Content */}
       <main className="lg:col-span-9 space-y-12">
         <section className="space-y-6">
+
+            {error && (
+            <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 text-sm">
+                {error}
+            </div>
+            )}
+
           <div className="relative">
             <textarea 
               className="claim-input"
@@ -62,7 +71,7 @@ export const VerifyPage = ({ isVerifying, handleVerify, showResult, settings }: 
               Verification uses FEVER-trained DeBERTa models against 2018 Wikipedia snapshots.
             </p>
             <button 
-              onClick={handleVerify}
+              onClick={() => handleVerify(claimText)}
               disabled={isVerifying}
               className="verify-button w-full md:w-auto"
             >
@@ -94,9 +103,17 @@ export const VerifyPage = ({ isVerifying, handleVerify, showResult, settings }: 
                       Predicted Verdict
                     </span>
                     <div className="flex items-center gap-6">
-                      <div className="result-label label-supports text-xl shadow-2xl shadow-emerald-500/20">
+                        <div
+                        className={`result-label text-xl shadow-2xl ${
+                            result?.label === "SUPPORTS"
+                            ? "label-supports shadow-emerald-500/20"
+                            : result?.label === "REFUTES"
+                            ? "label-refutes shadow-red-500/20"
+                            : "label-nei shadow-slate-500/20"
+                        }`}
+                        >                        
                         <CheckCircle2 className="w-6 h-6 mr-3" />
-                        SUPPORTS
+                        {result?.label}
                       </div>
                     </div>
                     <div className="mt-8 p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/20 text-emerald-100 text-sm">
@@ -109,9 +126,9 @@ export const VerifyPage = ({ isVerifying, handleVerify, showResult, settings }: 
                     <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest block mb-4">
                       Confidence
                     </span>
-                    <div className="confidence-score italic mb-2 font-black">0.87</div>
+                    <div className="confidence-score italic mb-2 font-black">{result?.confidence?.toFixed(2)}</div>
                     <div className="score-bar-container">
-                      <motion.div initial={{ width: 0 }} animate={{ width: '87%' }} transition={{ duration: 1.5, ease: "easeOut" }} className="score-bar-fill"></motion.div>
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${(result?.confidence ?? 0) * 100}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className="score-bar-fill"></motion.div>
                     </div>
                   </div>
 
@@ -140,7 +157,7 @@ export const VerifyPage = ({ isVerifying, handleVerify, showResult, settings }: 
                 </div>
 
                 <div className="space-y-6">
-                  {MOCK_EVIDENCE.slice(0, settings.topK).map((ev, i) => (
+                  {result?.evidence?.map((ev: any, i: number) => (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, x: -20 }}
@@ -163,10 +180,9 @@ export const VerifyPage = ({ isVerifying, handleVerify, showResult, settings }: 
                         </div>
                       </div>
 
-                      <p 
-                        className="text-slate-300 leading-relaxed text-lg"
-                        dangerouslySetInnerHTML={{ __html: ev.text }}
-                      />
+                      <p className="text-slate-300 leading-relaxed text-lg">
+                        {ev.text}
+                      </p>
 
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-8 pt-8 border-t border-slate-800/50">
                         <div className="space-y-2">

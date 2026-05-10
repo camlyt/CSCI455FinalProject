@@ -6,11 +6,15 @@ import { SettingsPage } from './components/SettingsPage';
 import { AnalyticsPage } from './components/AnalyticsPage';
 import { TutorialPage } from './components/TutorialPage';
 import { Page, AppSettings } from './types';
+import { verifyClaim } from "./api";
 
 export default function App() {
   const [activePage, setActivePage] = useState<Page>('verify');
   const [isVerifying, setIsVerifying] = useState(false);
   const [showResult, setShowResult] = useState(false);
+
+  const [verificationResult, setVerificationResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   
   // Interactive Settings State
   const [settings, setSettings] = useState<AppSettings>({
@@ -23,13 +27,20 @@ export default function App() {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
 
-  const handleVerify = () => {
+  const handleVerify = async (claim: string) => {
     setIsVerifying(true);
     setShowResult(false);
-    setTimeout(() => {
-      setIsVerifying(false);
-      setShowResult(true);
-    }, 2000);
+    setError(null);
+
+    try {
+        const result = await verifyClaim(claim, settings);
+        setVerificationResult(result);
+        setShowResult(true);
+    } catch (err) {
+        setError("Could not verify claim. Make sure the backend is running.");
+    } finally {
+        setIsVerifying(false);
+    }
   };
 
   return (
@@ -51,6 +62,8 @@ export default function App() {
                 handleVerify={handleVerify} 
                 showResult={showResult}
                 settings={settings}
+                result={verificationResult}
+                error={error}
               />
             )}
             {activePage === 'settings' && (
