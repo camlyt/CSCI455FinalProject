@@ -89,33 +89,41 @@ def evaluate_all_k(data, model, index, metadata, reranker):
 # NEW: Full pipeline accuracy
 # -----------------------------
 
-def evaluate_accuracy(data, model, index, metadata, reranker, verifier):
+def evaluate_accuracy(data, model, index, metadata, verifier):
     correct = 0
     total = 0
 
-    for example in data:   # ← example is defined HERE
-
+    for i, example in enumerate(data, start=1):
         claim = example["claim"]
         gold_label = example["label"]
 
-        # 👇 anything using example MUST be inside this loop
-        gold_keys = set(get_gold_keys(example))
+        print(f"\nAccuracy example {i}/{len(data)}")
+        print("Claim:", claim)
+        print("Gold label:", gold_label)
 
+        print("Retrieving evidence without reranker...")
         results = search_claim(
             claim,
             model=model,
             index=index,
             metadata=metadata,
-            reranker=reranker,
-            top_k=5
+            reranker=None,
+            top_k=5,
+            candidate_k=10
         )
 
+        print("Retrieved evidence count:", len(results))
+
+        print("Running verifier...")
         pred_label = verifier.predict(claim, results)
+
+        print("Predicted label:", pred_label)
 
         if pred_label == gold_label:
             correct += 1
 
         total += 1
+        print(f"Running accuracy: {correct}/{total} = {correct / total:.4f}")
 
     return correct / total if total > 0 else 0.0
 # -----------------------------
@@ -124,8 +132,7 @@ def evaluate_accuracy(data, model, index, metadata, reranker, verifier):
 
 if __name__ == "__main__":
 
-    reranker = Reranker()
-    verifier = Verifier()
+    reranker = None
 
     train_path = "data/raw/train.jsonl"
     index_path = "data/index/wiki_targeted_subset.index"
@@ -136,7 +143,7 @@ if __name__ == "__main__":
     raw_data = load_jsonl(train_path)
 
     print("Normalizing FEVER examples...")
-    data = [normalize_example(ex) for ex in raw_data[:200]]
+    data = [normalize_example(ex) for ex in raw_data[:10]]
 
     print("Loading model...")
     model = SentenceTransformer(model_name)
@@ -158,14 +165,21 @@ if __name__ == "__main__":
     # -----------------------------
     # Full pipeline accuracy
     # -----------------------------
+    print("\nLoading verifier only for full pipeline evaluation...")
+    verifier = Verifier()
+
     print("\nRunning full pipeline evaluation...")
     accuracy = evaluate_accuracy(
         data,
         model,
         index,
         metadata,
-        reranker,
         verifier
     )
 
     print("\nFinal Pipeline Accuracy:", accuracy)
+
+    # Temporary workaround for local macOS/FAISS shutdown segfault.
+    import os
+
+    os._exit(0)

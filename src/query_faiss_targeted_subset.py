@@ -85,11 +85,24 @@ def search_claim(
     model,
     index,
     metadata,
-    reranker,
-    top_k=5
+    reranker=None,
+    top_k=5,
+    candidate_k=50
 ):
     """
-    Dense retrieval + reranking
+    Dense retrieval, optionally followed by reranking.
+
+    Args:
+        claim: Input claim.
+        model: SentenceTransformer embedding model.
+        index: FAISS index.
+        metadata: Metadata records corresponding to FAISS rows.
+        reranker: Optional reranker. If None, returns dense retrieval results only.
+        top_k: Number of final results to return.
+        candidate_k: Number of dense candidates to retrieve before optional reranking.
+
+    Returns:
+        A list of retrieved evidence dictionaries.
     """
 
     query_embedding = model.encode(
@@ -99,8 +112,7 @@ def search_claim(
     query_embedding = query_embedding.astype("float32")
     query_embedding = normalize_vector(query_embedding)
 
-    # retrieve more candidates for reranking
-    scores, indices = index.search(query_embedding, 50)
+    scores, indices = index.search(query_embedding, candidate_k)
 
     candidates = []
     for score, idx in zip(scores[0], indices[0]):
@@ -112,9 +124,10 @@ def search_claim(
             "text": record["text"]
         })
 
-    # rerank candidates
-    reranked = reranker.rerank(claim, candidates, top_k=top_k)
+    if reranker is None:
+        return candidates[:top_k]
 
+    reranked = reranker.rerank(claim, candidates, top_k=top_k)
     return reranked
 
 if __name__ == "__main__":
