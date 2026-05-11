@@ -361,6 +361,23 @@ debug_verifier.py
 They may still be useful for debugging, but the official pipeline is defined in run_pipeline.py.
 
 --- 
+## Launch the App
+
+Start the backend server from the project root:
+```
+python -m uvicorn app.backend.main:app --reload
+```
+
+Frontend setup (React + Vite)
+Oppen up a new terminal.
+```
+cd app/frontend
+npm isntall
+npm run dev
+```
+The app will be hosted at: http://localhost:3000
+
+--- 
 ## Limitations
 This project currently uses a targeted subset of the Wikipedia corpus rather than the full FEVER Wikipedia corpus for evaluation. This makes the experiment computationally manageable and useful for controlled testing, but it is not a full FEVER benchmark evaluation.
 ### Known limitations:
