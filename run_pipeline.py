@@ -2,31 +2,47 @@ import subprocess
 import sys
 
 """
-Pipeline for CSCI455 Final Project
+run_pipeline.py
 
-This version reflects the CURRENT correct workflow:
-- Old subset pipeline is removed
-- Uses targeted subset pipeline for meaningful evaluation
-- Allows skipping expensive steps after first run
+Pipeline runner for the current CSCI455 final project workflow.
+
+Current official workflow:
+1. Build a targeted Wikipedia subset from FEVER evidence pages.
+2. Build a FAISS index over the targeted subset.
+3. Run dense retrieval + reranking and save retrieved evidence.
+4. Run verifier evaluation from saved retrieval outputs.
+5. Run error analysis.
+
+Older preprocessing/debug scripts are kept in the repository but skipped here
+because their outputs have already been generated or they are only used for
+inspection/debugging.
 """
 
 PIPELINE = [
     # -----------------------------
-    # Data + preprocessing (run once)
+    # Data + preprocessing/debug steps
+    # Already completed or optional
     # -----------------------------
     ("data_loader", False),
     ("preprocess", False),
-    ("inspect_wiki", False),      # optional debug
-    ("wiki_preprocess", False),   # VERY expensive — run once
+    ("inspect_wiki", False),
+    ("wiki_preprocess", False),
     ("validate_corpus", False),
 
     # -----------------------------
-    # Targeted retrieval pipeline (core)
+    # Index-building steps
+    # Run only if changing NUM_EXAMPLES or rebuilding data/index files
     # -----------------------------
-    ("build_targeted_subset", True),        # run once unless dataset changes
-    ("build_faiss_targeted_subset", True), # run once unless rebuilding index
-    ("query_faiss_targeted_subset", True),  # quick sanity check
-    ("evaluate_retrieval", True),           # YOUR MAIN STEP
+    ("build_targeted_subset", False),
+    ("build_faiss_targeted_subset", False),
+
+    # -----------------------------
+    # Official final evaluation workflow
+    # -----------------------------
+    ("save_dense_candidates", True),
+    ("rerank_saved_candidates", True),
+    ("evaluate_verifier_from_outputs", True),
+    ("analyze_pipeline_errors", True),
 ]
 
 
@@ -35,7 +51,7 @@ def run_step(module_name):
 
     try:
         subprocess.run(
-            ["python", "-m", f"src.{module_name}"],
+            [sys.executable, "-m", f"src.{module_name}"],
             check=True
         )
         print(f"✅ Completed {module_name}")
