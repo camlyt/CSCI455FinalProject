@@ -19,8 +19,9 @@ export default function App() {
   // Interactive Settings State
   const [settings, setSettings] = useState<AppSettings>({
     topK: 5,
-    threshold: 0.8,
-    retriever: 'minilm'
+    retriever: 'minilm',
+    retrievalMode: 'fever',
+    useReranker: true,
   });
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
@@ -62,9 +63,10 @@ export default function App() {
                 handleVerify={handleVerify} 
                 showResult={showResult}
                 settings={settings}
+                updateSettings={updateSettings}
                 result={verificationResult}
                 error={error}
-              />
+                />
             )}
             {activePage === 'settings' && (
               <SettingsPage 
@@ -89,8 +91,9 @@ export default function App() {
             <span className="text-sky-500">K:</span> {settings.topK}
           </span>
           <span className="flex items-center gap-1">
-            <span className="text-sky-500">T:</span> {settings.threshold}
-          </span>
+                <span className="text-sky-500">R:</span>
+                {settings.useReranker ? "ON" : "OFF"}
+            </span>
           <span>Model: DeBERTa-v3-NLI</span>
           <span>Latency: 24ms</span>
         </div>

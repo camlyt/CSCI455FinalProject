@@ -24,20 +24,20 @@ PIPELINE = [
     # DATA PREPROCESSING
     # =========================================================
 
-    ("src.data.data_loader", True),
-    ("src.data.preprocess", True),
-    ("src.data.inspect_wiki", True),
-    ("src.data.wiki_preprocess", True),
-    ("src.data.validate_corpus", True),
+    ("src.data.data_loader", False),
+    ("src.data.preprocess", False),
+    ("src.data.inspect_wiki", False),
+    ("src.data.wiki_preprocess", False),
+    ("src.data.validate_corpus", False),
 
     # =========================================================
     # RETRIEVAL / INDEX BUILDING
     # =========================================================
 
-    ("src.retrieval.build_corpus_subset", False),
-    ("src.retrieval.build_targeted_subset", False),
-    ("src.retrieval.build_faiss_subset", False),
-    ("src.retrieval.build_faiss_targeted_subset", False),
+    ("src.retrieval.build_corpus_subset", True),
+    ("src.retrieval.build_targeted_subset", True),
+    ("src.retrieval.build_faiss_subset", True),
+    ("src.retrieval.build_faiss_targeted_subset", True),
 
     # =========================================================
     # OFFICIAL FINAL PIPELINE

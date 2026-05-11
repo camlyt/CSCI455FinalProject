@@ -24,7 +24,9 @@ app.add_middleware(
 class VerifyRequest(BaseModel):
     claim: str
     top_k: int = 5
-    threshold: float = 0.8
+    retriever: str = "minilm"
+    retrieval_mode: str = "fever"
+    use_reranker: bool = True
 
 
 @app.get("/")
@@ -37,5 +39,7 @@ def verify(request: VerifyRequest):
     return verify_claim(
         claim=request.claim,
         top_k=request.top_k,
-        threshold=request.threshold,
+        retriever=request.retriever,
+        retrieval_mode=request.retrieval_mode,
+        use_reranker=request.use_reranker,
     )

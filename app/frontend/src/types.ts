@@ -4,6 +4,8 @@ export type Page = 'verify' | 'settings' | 'analytics' | 'tutorial';
 
 export type Label = 'SUPPORTS' | 'REFUTES' | 'NOT ENOUGH INFO';
 
+export type RetrievalMode = 'fever' | 'internet';
+
 export interface Evidence {
   text: string;
   page: string;
@@ -21,6 +23,7 @@ export interface PipelineStep {
 
 export interface AppSettings {
   topK: number;
-  threshold: number;
   retriever: string;
+  retrievalMode: RetrievalMode;
+  useReranker: boolean;
 }

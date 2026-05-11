@@ -8,12 +8,23 @@ interface VerifyPageProps {
   isVerifying: boolean;
   handleVerify: (claim: string) => void;
   showResult: boolean;
+
   settings: AppSettings;
+  updateSettings: (settings: Partial<AppSettings>) => void;
+
   result: any;
   error: string | null;
 }
 
-export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, result, error}: VerifyPageProps) => {
+export const VerifyPage = ({
+  isVerifying,
+  handleVerify,
+  showResult,
+  settings,
+  updateSettings,
+  result,
+  error
+}: VerifyPageProps) => {
   const [claimText, setClaimText] = useState("Roman Atwood is a content creator.");
   
   const normalizedLabel = result?.label?.toUpperCase().replaceAll("_", " ");
@@ -47,7 +58,7 @@ export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, r
           <h4 className="font-display font-medium leading-tight text-white">Fast, Reliable, Interpretable.</h4>
           <p className="text-slate-400 text-xs text-balance">Exposing the full pipeline of automated fact-checking.</p>
           <div className="text-[10px] font-mono text-sky-500/60 mt-4 border-t border-sky-500/10 pt-4">
-            SETTING: K={settings.topK} | T={settings.threshold}
+            SETTING: K={settings.topK} | R={settings.useReranker ? "ON" : "OFF"}
           </div>
         </div>
       </aside>
@@ -69,6 +80,43 @@ export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, r
               onChange={(e) => setClaimText(e.target.value)}
               placeholder="Enter your claim here..."
             />
+
+            <div className="flex items-center gap-4">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                    Retrieval Source
+                </span>
+
+                <div className="flex bg-slate-900 border border-slate-800 rounded-2xl p-1 shadow-inner">
+
+                    <button
+                    onClick={() =>
+                        updateSettings({ retrievalMode: 'fever' })
+                    }
+                    className={`px-5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all duration-200 ${
+                        settings.retrievalMode === 'fever'
+                        ? 'bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/20'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                    >
+                    FEVER GOLD
+                    </button>
+
+                    <button
+                    onClick={() =>
+                        updateSettings({ retrievalMode: 'internet' })
+                    }
+                    className={`px-5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all duration-200 ${
+                        settings.retrievalMode === 'internet'
+                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                    >
+                    LIVE WIKI
+                    </button>
+
+                </div>
+            </div>
+
             <div className="absolute top-4 right-4 bg-slate-800 text-slate-400 font-mono text-[10px] px-2 py-1 rounded">
               L: {claimText.length}
             </div>
@@ -160,7 +208,17 @@ export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, r
                     </div>
                     <div>
                       <span className="text-xs font-mono font-bold text-slate-500 uppercase mb-2 block">Reranker</span>
-                      <span className="text-xs font-mono bg-slate-800 text-slate-300 px-2 py-1 rounded inline-block">Cross-Encoder-v3</span>
+                        <span
+                            className={`text-xs font-mono px-2 py-1 rounded inline-block ${
+                                settings.useReranker
+                                ? "bg-sky-500/20 text-sky-300"
+                                : "bg-slate-800 text-slate-500"
+                            }`}
+                            >
+                            {settings.useReranker
+                                ? "CrossEncoder Enabled"
+                                : "Dense Retrieval Only"}
+                        </span>
                     </div>
                   </div>
                 </div>
@@ -214,12 +272,25 @@ export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, r
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <span className="text-[10px] font-mono text-slate-500 uppercase">Rerank Score</span>
-                          <div className="font-black text-sm tracking-tighter font-mono text-sky-400">{ev.rerank_score.toFixed(2)}</div>
-                          <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-sky-500" style={{ width: `${(ev.rerank_score / 6) * 100}%` }}></div>
-                          </div>
-                        </div>
+                            <span className="text-[10px] font-mono text-slate-500 uppercase">
+                                Rerank Score
+                            </span>
+                            {settings.useReranker && ev.rerank_score != null ? (
+                                <>
+                                <div className="font-black text-sm tracking-tighter font-mono text-sky-400">
+                                    {ev.rerank_score.toFixed(2)}
+                                </div>
+                                <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                                    <div className="h-full bg-sky-500" style={{width: `${(ev.rerank_score / 6) * 100}%`}}></div>
+                                </div>
+                                </>
+                            ) : (
+                                <div className="text-xs text-slate-500 italic">
+                                Dense retrieval only
+                                </div>
+                            )}
+
+                            </div>
                       </div>
                     </motion.div>
                   ))}

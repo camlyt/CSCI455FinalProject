@@ -54,8 +54,23 @@ export const PIPELINE_STEPS: PipelineStep[] = [
 ];
 
 export const RETRIEVER_MODELS = [
-  { id: 'minilm', name: 'MiniLM-v6 (Default)', desc: 'Fast, lightweight embeddings.' },
-  { id: 'bge', name: 'BGE-v1.5 Large', desc: 'State-of-the-art dense retrieval.' },
-  { id: 'hybrid', name: 'BM25 Hybrid', desc: 'Traditional keyword + vector search.' },
-  { id: 'rerank', name: 'Dense + Reranker', desc: 'Maximum precision research mode.' }
+
+  {
+    id: 'minilm',
+    name: 'MiniLM-v6',
+    desc:
+      'Fast lightweight dense retriever using all-MiniLM-L6-v2 embeddings.'
+  },
+  {
+    id: 'bge',
+    name: 'BGE-v1.5',
+    desc:
+      'Semantic dense retriever using BAAI/bge-small-en-v1.5 embeddings.'
+  },
+  {
+    id: 'e5',
+    name: 'E5-small-v2',
+    desc:
+      'Query-document optimized retriever using intfloat/e5-small-v2 embeddings.'
+  }
 ];

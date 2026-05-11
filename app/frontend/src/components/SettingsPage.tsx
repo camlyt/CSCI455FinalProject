@@ -34,22 +34,46 @@ export const SettingsPage = ({ settings, updateSettings }: SettingsPageProps) =>
             </div>
 
             <div className="setting-card">
-              <label className="text-xs font-mono font-bold uppercase tracking-widest text-slate-400">Verification Threshold</label>
-              <div className="flex gap-2">
-                {[0.6, 0.7, 0.8, 0.9].map(t => (
-                  <button 
-                    key={t} 
-                    onClick={() => updateSettings({ threshold: t })}
-                    className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-all ${settings.threshold === t ? 'bg-sky-500 text-slate-900 border-sky-500 shadow-lg shadow-sky-500/20' : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-600'}`}
-                  >
-                    {t.toFixed(1)}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed italic mt-2">
-                Lower thresholds increase recall but risk false positives. Higher thresholds produce stricter NOT ENOUGH INFO predictions.
-              </p>
-            </div>
+
+                <label className="text-xs font-mono font-bold uppercase tracking-widest text-slate-400">
+                    CrossEncoder Reranking
+                </label>
+
+                <div className="flex gap-3">
+
+                    <button
+                    onClick={() =>
+                        updateSettings({ useReranker: true })
+                    }
+                    className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-all ${
+                        settings.useReranker
+                        ? 'bg-sky-500 text-slate-900 border-sky-500 shadow-lg shadow-sky-500/20'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-600'
+                    }`}
+                    >
+                    ENABLED
+                    </button>
+
+                    <button
+                    onClick={() =>
+                        updateSettings({ useReranker: false })
+                    }
+                    className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-all ${
+                        !settings.useReranker
+                        ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/20'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-600'
+                    }`}
+                    >
+                    DISABLED
+                    </button>
+
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed italic mt-2">
+                    Enables CrossEncoder reranking after dense retrieval. Improves evidence quality and ranking precision at the cost of additional latency.
+                </p>
+
+                </div>
           </div>
 
           {/* Model Selection */}

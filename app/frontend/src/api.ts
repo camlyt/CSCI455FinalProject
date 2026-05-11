@@ -1,23 +1,36 @@
-import { AppSettings } from "./types";
+import { AppSettings } from './types';
 
-export async function verifyClaim(claim: string, settings: AppSettings) {
-  const response = await fetch("http://127.0.0.1:8000/verify", {
-    method: "POST",
+const API_BASE = 'http://127.0.0.1:8000';
+
+export async function verifyClaim(
+  claim: string,
+  settings: AppSettings
+) {
+
+  const response = await fetch(`${API_BASE}/verify`, {
+    method: 'POST',
+
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
+
     body: JSON.stringify({
-      claim: claim,
+      claim,
       top_k: settings.topK,
-      threshold: settings.threshold,
+      retriever: settings.retriever,
+      retrieval_mode: settings.retrievalMode,
+      use_reranker: settings.useReranker,
     }),
   });
 
   if (!response.ok) {
+
     const errorText = await response.text();
-    console.error("Backend error:", errorText);
-    throw new Error(errorText);
+
+    throw new Error(
+      `Backend request failed: ${errorText}`
+    );
   }
 
-  return response.json();
+  return await response.json();
 }

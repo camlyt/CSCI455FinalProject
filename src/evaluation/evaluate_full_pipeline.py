@@ -49,6 +49,7 @@ def compute_recall_at_k(
             model=model,
             index=index,
             metadata=metadata,
+            retriever_id="minilm",
             reranker=reranker,
             top_k=k
         )

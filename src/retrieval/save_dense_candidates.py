@@ -82,6 +82,7 @@ if __name__ == "__main__":
             model=model,
             index=index,
             metadata=metadata,
+            retriever_id="minilm",
             reranker=None,
             top_k=CANDIDATE_K,
             candidate_k=CANDIDATE_K
