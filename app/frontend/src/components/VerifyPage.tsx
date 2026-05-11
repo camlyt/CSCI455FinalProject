@@ -16,6 +16,13 @@ interface VerifyPageProps {
 export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, result, error}: VerifyPageProps) => {
   const [claimText, setClaimText] = useState("Roman Atwood is a content creator.");
   
+  const normalizedLabel = result?.label?.toUpperCase().replaceAll("_", " ");
+  const isSupports = normalizedLabel === "SUPPORTS";
+  const isRefutes = normalizedLabel === "REFUTES";
+  const isNEI =
+    normalizedLabel === "NOT ENOUGH INFO" ||
+    normalizedLabel === "NEI";
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 max-w-7xl mx-auto px-8 pb-32">
       {/* Sidebar: History */}
@@ -104,21 +111,22 @@ export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, r
                     </span>
                     <div className="flex items-center gap-6">
                         <div
-                        className={`result-label text-xl shadow-2xl ${
-                            result?.label === "SUPPORTS"
-                            ? "label-supports shadow-emerald-500/20"
-                            : result?.label === "REFUTES"
-                            ? "label-refutes shadow-red-500/20"
-                            : "label-nei shadow-slate-500/20"
-                        }`}
-                        >                        
-                        <CheckCircle2 className="w-6 h-6 mr-3" />
-                        {result?.label}
-                      </div>
+                            className={`result-label text-xl shadow-2xl ${
+                                isSupports
+                                ? "label-supports shadow-emerald-500/20"
+                                : isRefutes
+                                ? "label-refutes shadow-red-500/20"
+                                : "label-nei shadow-slate-500/20"
+                            }`}
+                            >
+                            <CheckCircle2 className="w-6 h-6 mr-3" />
+                            {normalizedLabel}
+                        </div>
                     </div>
                     <div className="mt-8 p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/20 text-emerald-100 text-sm">
                       <span className="font-bold block mb-1">Reasoning Explanation</span>
-                      The model identified direct entailment between the subject (Roman Atwood) and the role (content creator) within the top-ranked evidence using {settings.retriever.toUpperCase()} retrieval.
+                        The model predicted {result?.label} using the retrieved evidence and the current verifier scores.
+                           
                     </div>
                   </div>
 
@@ -129,6 +137,19 @@ export const VerifyPage = ({  isVerifying, handleVerify, showResult, settings, r
                     <div className="confidence-score italic mb-2 font-black">{result?.confidence?.toFixed(2)}</div>
                     <div className="score-bar-container">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${(result?.confidence ?? 0) * 100}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className="score-bar-fill"></motion.div>
+                    </div>
+                    <div className="text-xs font-mono font-bold text-white tracking-wide block mb-4 pt-5 flex flex-col gap-1">
+                        <span>
+                            Entailment: {result?.scores?.entailment?.toFixed(2)}
+                        </span>
+
+                        <span>
+                            Neutral: {result?.scores?.neutral?.toFixed(2)}
+                        </span>
+
+                        <span>
+                            Contradiction: {result?.scores?.contradiction?.toFixed(2)}
+                        </span>
                     </div>
                   </div>
 

@@ -6,8 +6,6 @@ from src.reranker import Reranker
 from src.verifier import Verifier
 
 
-# ---- Load once at startup (IMPORTANT) ----
-
 model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
 print("Loading embedding model...")
@@ -19,41 +17,50 @@ index = faiss.read_index("data/index/wiki_targeted_subset.index")
 print("Loading metadata...")
 metadata = load_metadata("data/index/wiki_targeted_subset_metadata.json")
 
-print("Loading reranker + verifier...")
+print("Loading reranker...")
 reranker = Reranker()
+
+print("Loading verifier...")
 verifier = Verifier()
 
 print("Backend pipeline ready ✅")
 
 
-# ---- Main function used by FastAPI ----
-
 def verify_claim(claim: str, top_k: int = 5, threshold: float = 0.8):
-    
     print("\n--- VERIFY REQUEST ---")
     print("Claim:", claim)
+    print("Top K:", top_k)
+    print("Threshold:", threshold)
 
-    # 1. Retrieve + rerank
-    results = search_claim(
-        claim,
+    evidence = search_claim(
+        claim=claim,
         model=model,
         index=index,
         metadata=metadata,
         reranker=reranker,
-        top_k=top_k
+        top_k=top_k,
+        candidate_k=50,
     )
 
-    print("\nTop Evidence:")
-    for i, r in enumerate(results[:3]):
-        print(f"{i+1}.", r["text"][:120])
+    verifier_result = verifier.predict_with_scores(claim, evidence)
 
-    # 2. Predict label
-    label = verifier.predict(claim, results)
+    label = verifier_result["prediction"]
 
-    print("\nPredicted Label:", label)
+    entailment = verifier_result["entailment"]
+    contradiction = verifier_result["contradiction"]
+    neutral = verifier_result["neutral"]
+
+    score_values = [
+        s for s in [entailment, contradiction, neutral]
+        if s is not None
+    ]
+
+    confidence = max(score_values) if score_values else 0.0
+
+    print("Predicted label:", label)
+    print("Scores:", verifier_result)
+    print("Evidence count:", len(evidence))
     print("----------------------\n")
-
-    confidence = 0.85
 
     return {
         "claim": claim,
@@ -62,8 +69,13 @@ def verify_claim(claim: str, top_k: int = 5, threshold: float = 0.8):
         "settings": {
             "top_k": top_k,
             "threshold": threshold,
-            "retriever_model": "MiniLM",
+            "retriever_model": "MiniLM + FAISS",
             "verifier_model": "DeBERTa NLI",
         },
-        "evidence": results
+        "scores": {
+            "entailment": entailment,
+            "neutral": neutral,
+            "contradiction": contradiction,
+        },
+        "evidence": evidence,
     }
