@@ -24,9 +24,15 @@ class Verifier:
         max_contradiction = contradiction_scores.max()
 
         # threshold-based decision
-        if max_entailment > 0.8:
+        # if max_entailment > 0.6:
+        #     return "SUPPORTS"
+        # elif max_contradiction > 0.6:
+        #     return "REFUTES"
+        # else:
+        #     return "NOT ENOUGH INFO"
+        if max_entailment > max_contradiction and max_entailment > 0.7:
             return "SUPPORTS"
-        elif max_contradiction > 0.8:
+        elif max_contradiction > max_entailment and max_contradiction > 0.7:
             return "REFUTES"
         else:
             return "NOT ENOUGH INFO"
