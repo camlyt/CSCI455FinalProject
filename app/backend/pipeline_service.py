@@ -1,9 +1,9 @@
 from sentence_transformers import SentenceTransformer
 import faiss
 
-from src.query_faiss_targeted_subset import search_claim, load_metadata
-from src.reranker import Reranker
-from src.verifier import Verifier
+from src.retrieval.query_faiss_targeted_subset import (search_claim,load_metadata,)
+from src.reranking.reranker import Reranker
+from src.verification.verifier import Verifier
 
 
 model_name = "sentence-transformers/all-MiniLM-L6-v2"
