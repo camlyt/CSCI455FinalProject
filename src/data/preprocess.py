@@ -20,7 +20,7 @@ This prepares the data for later steps such as:
 
 
 from typing import Any, Dict, List
-from src.data_loader import load_jsonl
+from src.data.data_loader import load_jsonl
 
 def normalize_evidence(evidence: List[List[List[Any]]]) -> List[List[Dict[str, Any]]]:
     """

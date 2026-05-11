@@ -10,8 +10,8 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Set, Tuple
 
-from src.data_loader import load_jsonl
-from src.preprocess import normalize_example
+from src.data.data_loader import load_jsonl
+from src.data.preprocess import normalize_example
 
 
 def load_corpus_keys(corpus_path: str, limit: int | None = None) -> Set[Tuple[str, int]]:

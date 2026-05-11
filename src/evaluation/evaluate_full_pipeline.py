@@ -3,11 +3,11 @@ from typing import List, Dict, Any, Tuple
 import faiss
 from sentence_transformers import SentenceTransformer
 
-from src.data_loader import load_jsonl
-from src.preprocess import normalize_example
-from src.query_faiss_targeted_subset import search_claim, load_metadata
-from src.reranker import Reranker
-from src.verifier import Verifier
+from src.data.data_loader import load_jsonl
+from src.data.preprocess import normalize_example
+from src.retrieval.query_faiss_targeted_subset import search_claim, load_metadata
+from src.reranking.reranker import Reranker
+from src.verification.verifier import Verifier
 
 
 # -----------------------------

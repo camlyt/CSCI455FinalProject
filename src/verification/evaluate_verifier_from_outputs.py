@@ -10,7 +10,7 @@ one process.
 import json
 from pathlib import Path
 
-from src.verifier import Verifier
+from src.verification.verifier import Verifier
 
 
 def load_jsonl(file_path):

@@ -1,9 +1,10 @@
 """
-save_dense_candidates.py
+evaluate_retrieval_save_outputs.py
 
-Runs dense retrieval only and saves top candidate evidence for reranking.
-This keeps FAISS/SentenceTransformer separate from the CrossEncoder reranker
-to avoid local native-library crashes.
+Runs dense retrieval on FEVER examples and saves retrieved evidence to disk.
+
+This separates FAISS/SentenceTransformer retrieval from verifier inference to
+avoid local native-library crashes when everything is loaded in one process.
 """
 
 import json
@@ -13,9 +14,9 @@ from typing import Dict, Any, List, Tuple
 import faiss
 from sentence_transformers import SentenceTransformer
 
-from src.data_loader import load_jsonl
-from src.preprocess import normalize_example
-from src.query_faiss_targeted_subset import search_claim, load_metadata
+from src.data.data_loader import load_jsonl
+from src.data.preprocess import normalize_example
+from src.retrieval.query_faiss_targeted_subset import search_claim, load_metadata
 
 
 def get_gold_keys(example: Dict[str, Any]) -> List[Tuple[str, int]]:
@@ -37,12 +38,11 @@ def save_jsonl(records, output_path):
 
 if __name__ == "__main__":
     NUM_EXAMPLES = 100
-    CANDIDATE_K = 50
 
     train_path = "data/raw/train.jsonl"
     index_path = "data/index/wiki_targeted_subset.index"
     metadata_path = "data/index/wiki_targeted_subset_metadata.json"
-    output_path = "data/processed/dense_candidate_outputs.jsonl"
+    output_path = "data/processed/retrieval_outputs.jsonl"
     model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
     print("Loading FEVER data...")
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     print("Normalizing FEVER examples...")
     data = [normalize_example(ex) for ex in raw_data[:NUM_EXAMPLES]]
 
-    print("Loading dense retrieval model...")
+    print("Loading model...")
     model = SentenceTransformer(model_name)
 
     print("Loading FAISS index...")
@@ -71,23 +71,25 @@ if __name__ == "__main__":
         if not example["evidence_sets"]:
             continue
 
-        print(f"\nDense retrieving example {i}/{len(data)}")
+        print(f"\nRetrieving example {i}/{len(data)}")
 
         claim = example["claim"]
         gold_label = example["label"]
         gold_keys = set(get_gold_keys(example))
 
         results = search_claim(
-            claim=claim,
+            claim,
             model=model,
             index=index,
             metadata=metadata,
             reranker=None,
-            top_k=CANDIDATE_K,
-            candidate_k=CANDIDATE_K
+            top_k=10,
+            candidate_k=10
         )
 
-        retrieved_keys = [(r["page"], r["sentence_id"]) for r in results]
+        retrieved_keys = [
+            (r["page"], r["sentence_id"]) for r in results
+        ]
 
         if any(key in set(retrieved_keys[:1]) for key in gold_keys):
             hits_at_1 += 1
@@ -102,16 +104,16 @@ if __name__ == "__main__":
             "claim": claim,
             "gold_label": gold_label,
             "gold_keys": list(gold_keys),
-            "dense_candidates": results
+            "retrieved_evidence": results
         })
 
-    print("\nDense Retrieval Results")
+    print("\nRetrieval Results")
     print(f"Recall@1: {hits_at_1 / total if total else 0:.4f}")
     print(f"Recall@5: {hits_at_5 / total if total else 0:.4f}")
     print(f"Recall@10: {hits_at_10 / total if total else 0:.4f}")
 
     save_jsonl(output_records, output_path)
-    print(f"\nSaved dense candidates to {output_path}")
+    print(f"\nSaved retrieval outputs to {output_path}")
 
     # Temporary workaround for local macOS/FAISS shutdown segfault.
     import os

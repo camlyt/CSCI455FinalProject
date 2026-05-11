@@ -8,7 +8,7 @@ This avoids loading FAISS and the reranker in the same Python process.
 import json
 from pathlib import Path
 
-from src.reranker import Reranker
+from src.reranking.reranker import Reranker
 
 
 def load_jsonl(file_path):

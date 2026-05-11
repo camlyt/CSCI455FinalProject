@@ -1,4 +1,4 @@
-from src.verifier import Verifier
+from src.verification.verifier import Verifier
 
 
 if __name__ == "__main__":

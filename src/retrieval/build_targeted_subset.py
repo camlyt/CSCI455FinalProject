@@ -14,8 +14,8 @@ import json
 from pathlib import Path
 from typing import Set
 
-from src.data_loader import load_jsonl
-from src.preprocess import normalize_example
+from src.data.data_loader import load_jsonl
+from src.data.preprocess import normalize_example
 
 
 def collect_target_pages(train_path: str, num_examples: int = 100) -> Set[str]:

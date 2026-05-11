@@ -20,10 +20,10 @@ from typing import Dict, Any, List, Tuple
 import faiss
 from sentence_transformers import SentenceTransformer
 
-from src.data_loader import load_jsonl
-from src.preprocess import normalize_example
-from src.query_faiss_targeted_subset import search_claim, load_metadata
-from src.reranker import Reranker
+from src.data.data_loader import load_jsonl
+from src.data.preprocess import normalize_example
+from src.retrieval.query_faiss_targeted_subset import search_claim, load_metadata
+from src.reranking.reranker import Reranker
 
 
 def get_gold_keys(example: Dict[str, Any]) -> List[Tuple[str, int]]:

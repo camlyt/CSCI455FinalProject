@@ -10,7 +10,7 @@ examples where the predicted label does not match the FEVER gold label.
 import json
 from pathlib import Path
 
-from src.verifier import Verifier
+from src.verification.verifier import Verifier
 
 
 def load_jsonl(file_path):
