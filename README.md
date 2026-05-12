@@ -39,33 +39,75 @@ The system has four main stages:
 ```
 CSCI455FinalProject/
 │
+├── app/
+│   │
+│   ├── backend/
+│   │   ├── main.py
+│   │   ├── pipeline_service.py
+│   │   ├── wikipedia_retrieval.py
+│   │   └── __init__.py
+│   │
+│   └── frontend/
+│       │
+│       ├── src/
+│       │   ├── components/
+│       │   │   ├── VerifyPage.tsx
+│       │   │   ├── AnalyticsPage.tsx
+│       │   │   ├── TutorialPage.tsx
+│       │   │   ├── SettingsPage.tsx
+│       │   │   └── Navigation.tsx
+│       │   │   
+│       │   │
+│       │   ├── App.tsx
+│       │   ├── api.ts
+│       │   ├── constants.ts
+│       │   ├── types.ts
+│       │   ├── main.tsx
+│       │   └── index.css
+│       │
+│       ├── package.json
+│       ├── vite.config.ts
+│       └── tsconfig.json
+│
 ├── data/
-│   ├── raw/              # Raw FEVER data and wiki dump files (not committed)
-│   ├── processed/        # Processed JSONL outputs (not committed)
-│   └── index/            # FAISS indexes and metadata (not committed)
+│   ├── raw/                  # Raw FEVER data and wiki files
+│   ├── processed/            # Saved retrieval outputs / reranked outputs
+│   └── index/                # FAISS indexes and metadata
 │
 ├── src/
-│   ├── data_loader.py
-│   ├── preprocess.py
+│   │
+│   ├── data/
+│   │   ├── data_loader.py
+│   │   └── preprocess.py
+│   │
+│   ├── retrieval/
+│   │   ├── build_faiss_targeted_subset.py
+│   │   ├── query_faiss_targeted_subset.py
+│   │   ├── reranker.py
+│   │   ├── save_dense_candidates.py
+│   │   └── rerank_saved_candidates.py
+│   │
+│   ├── verification/
+│   │   ├── verifier.py
+│   │   ├── evaluate_verifier_from_outputs.py
+│   │   ├── evaluate_full_pipeline.py
+│   │   ├── analyze_pipeline_errors.py
+│   │   └── debug_verifier.py
+│   │
+│   ├── wiki/
+│   │   ├── save_live_wikipedia_candidates.py
+│   │   └── evaluate_live_wikipedia_outputs.py
+│   │
+│   ├── pipeline/
+│   │   ├── run_pipeline.py
+│   │
 │   ├── inspect_wiki.py
 │   ├── wiki_preprocess.py
-│   ├── validate_corpus.py
-│   │
-│   ├── build_targeted_subset.py
-│   ├── build_faiss_targeted_subset.py
-│   ├── save_dense_candidates.py
-│   ├── rerank_saved_candidates.py
-│   ├── evaluate_verifier_from_outputs.py
-│   ├── analyze_pipeline_errors.py
-│   │
-│   ├── query_faiss_targeted_subset.py
-│   ├── reranker.py
-│   ├── verifier.py
-│   └── debug_verifier.py
+│   └── validate_corpus.py
 │
-├── run_pipeline.py
 ├── requirements.txt
-└── README.md
+├── README.md
+└── .gitignore
 ```
 ---
 ## Setup
@@ -182,10 +224,10 @@ python -m uvicorn app.backend.main:app --reload
 ```
 
 Frontend setup (React + Vite)
-Oppen up a new terminal.
+Open up a new terminal.
 ```
 cd app/frontend
-npm isntall
+npm install
 npm run dev
 ```
 The app will be hosted at: http://localhost:3000
