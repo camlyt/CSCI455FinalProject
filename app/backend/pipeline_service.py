@@ -179,6 +179,9 @@ def verify_claim(
 
         evidence = search_wikipedia(
             claim=claim,
+
+            model=retrievers[retriever],
+
             top_k=top_k * 3,
         )
 

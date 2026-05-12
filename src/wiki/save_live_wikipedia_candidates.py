@@ -4,10 +4,11 @@ save_live_wikipedia_candidates.py
 Runs LIVE Wikipedia retrieval and saves retrieved evidence
 to disk for later evaluation.
 
-This prevents:
-    - repeated API requests
-    - rate limiting
-    - expensive reruns
+Features:
+    - persistent caching via saved JSONL
+    - resumable processing
+    - rate-limit protection
+    - incremental saving
 
 Outputs:
     data/processed/live_wikipedia_candidates.jsonl
@@ -16,6 +17,8 @@ Outputs:
 import json
 import time
 from pathlib import Path
+
+from sentence_transformers import SentenceTransformer
 
 from src.data.data_loader import load_jsonl
 from src.data.preprocess import normalize_example
@@ -26,7 +29,7 @@ from app.backend.wikipedia_retrieval import search_wikipedia
 # CONFIG
 # =========================================================
 
-NUM_EXAMPLES = 75
+NUM_EXAMPLES = 300
 
 TOP_K = 5
 
@@ -34,9 +37,19 @@ OUTPUT_PATH = (
     "data/processed/live_wikipedia_candidates.jsonl"
 )
 
-SAVE_EVERY = 1
-
 REQUEST_DELAY = 20.0
+
+MODEL_NAME = (
+    "sentence-transformers/all-MiniLM-L6-v2"
+)
+
+# =========================================================
+# LOAD MODEL
+# =========================================================
+
+print("Loading retrieval model...")
+
+model = SentenceTransformer(MODEL_NAME)
 
 # =========================================================
 # SAVE HELPERS
@@ -64,6 +77,41 @@ def append_jsonl(record, output_path):
         )
 
 # =========================================================
+# LOAD COMPLETED CLAIMS
+# =========================================================
+
+def load_completed_claims(output_path):
+
+    completed = set()
+
+    path = Path(output_path)
+
+    if not path.exists():
+
+        return completed
+
+    with path.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
+
+        for line in file:
+
+            try:
+
+                record = json.loads(line)
+
+                completed.add(
+                    record["claim"]
+                )
+
+            except Exception:
+
+                continue
+
+    return completed
+
+# =========================================================
 # LOAD DATA
 # =========================================================
 
@@ -81,6 +129,18 @@ data = [
 ]
 
 # =========================================================
+# LOAD CACHE
+# =========================================================
+
+completed_claims = load_completed_claims(
+    OUTPUT_PATH
+)
+
+print(
+    f"Loaded {len(completed_claims)} cached claims"
+)
+
+# =========================================================
 # RUN LIVE RETRIEVAL
 # =========================================================
 
@@ -96,16 +156,34 @@ for i, example in enumerate(data, start=1):
 
     print("Claim:", claim)
 
+    # -----------------------------------------------------
+    # SKIP COMPLETED CLAIMS
+    # -----------------------------------------------------
+
+    if claim in completed_claims:
+
+        print("Skipping cached claim")
+
+        continue
+
+    # -----------------------------------------------------
+    # RUN RETRIEVAL
+    # -----------------------------------------------------
+
     try:
 
         evidence = search_wikipedia(
             claim=claim,
+            model=model,
             top_k=TOP_K,
         )
 
         record = {
+
             "claim": claim,
+
             "gold_label": gold_label,
+
             "evidence": evidence,
         }
 
@@ -122,10 +200,18 @@ for i, example in enumerate(data, start=1):
 
         print(f"FAILED: {e}")
 
+    # -----------------------------------------------------
+    # RATE LIMIT PROTECTION
+    # -----------------------------------------------------
+
     print(
         f"Sleeping {REQUEST_DELAY} seconds..."
     )
 
     time.sleep(REQUEST_DELAY)
+
+# =========================================================
+# DONE
+# =========================================================
 
 print("\nDone.")

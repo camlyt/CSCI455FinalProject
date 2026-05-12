@@ -1,7 +1,10 @@
 import re
 import time
 import requests
+import numpy as np
+
 from typing import List, Dict, Any
+from sentence_transformers import SentenceTransformer
 
 # =========================================================
 # SIMPLE IN-MEMORY PAGE CACHE
@@ -18,7 +21,7 @@ HEADERS = {
 }
 
 # =========================================================
-# REQUEST HELPERS
+# REQUEST SETTINGS
 # =========================================================
 
 REQUEST_DELAY = 1.0
@@ -91,19 +94,12 @@ def wikipedia_search(claim: str, top_k: int = 3):
 
 def fetch_page_extract(title: str):
 
-    # -----------------------------------------------------
-    # CACHE HIT
-    # -----------------------------------------------------
-
+    # Cache hit
     if title in PAGE_CACHE:
 
         print(f"Cache hit: {title}")
 
         return PAGE_CACHE[title]
-
-    # -----------------------------------------------------
-    # RATE LIMIT PROTECTION
-    # -----------------------------------------------------
 
     time.sleep(REQUEST_DELAY)
 
@@ -198,17 +194,139 @@ def split_sentences(text: str):
     return cleaned
 
 # =========================================================
+# COSINE SIMILARITY
+# =========================================================
+
+def cosine_similarity(a, b):
+
+    return np.dot(a, b)
+
+# =========================================================
+# SEMANTIC RANKING
+# =========================================================
+
+def semantic_rank_sentences(
+    claim: str,
+    sentences: List[Dict[str, Any]],
+    model: SentenceTransformer,
+    top_k: int = 15,
+):
+
+    if not sentences:
+        return []
+
+    sentence_texts = [
+        s["text"]
+        for s in sentences
+    ]
+
+    # E5 formatting
+    if "e5" in model.__class__.__name__.lower():
+
+        query_text = "query: " + claim
+
+        sentence_texts = [
+            "passage: " + t
+            for t in sentence_texts
+        ]
+
+    else:
+
+        query_text = claim
+
+    # -----------------------------------------------------
+    # EMBED QUERY
+    # -----------------------------------------------------
+
+    query_embedding = model.encode(
+        query_text,
+        convert_to_numpy=True,
+    )
+
+    query_embedding = query_embedding.astype(
+        "float32"
+    )
+
+    query_embedding /= np.linalg.norm(
+        query_embedding
+    )
+
+    # -----------------------------------------------------
+    # EMBED SENTENCES
+    # -----------------------------------------------------
+
+    sentence_embeddings = model.encode(
+        sentence_texts,
+        batch_size=16,
+        convert_to_numpy=True,
+        show_progress_bar=False,
+    )
+
+    sentence_embeddings = (
+        sentence_embeddings.astype("float32")
+    )
+
+    sentence_embeddings /= np.linalg.norm(
+        sentence_embeddings,
+        axis=1,
+        keepdims=True,
+    )
+
+    # -----------------------------------------------------
+    # COMPUTE SCORES
+    # -----------------------------------------------------
+
+    scored_sentences = []
+
+    for sentence, embedding in zip(
+        sentences,
+        sentence_embeddings,
+    ):
+
+        similarity = cosine_similarity(
+            query_embedding,
+            embedding,
+        )
+
+        sentence["score"] = float(similarity)
+
+        scored_sentences.append(sentence)
+
+    # -----------------------------------------------------
+    # SORT
+    # -----------------------------------------------------
+
+    scored_sentences.sort(
+        key=lambda x: x["score"],
+        reverse=True,
+    )
+
+    return scored_sentences[:top_k]
+
+# =========================================================
 # MAIN RETRIEVAL PIPELINE
 # =========================================================
 
-def search_wikipedia(claim: str, top_k: int = 5):
+def search_wikipedia(
+    claim: str,
+    model: SentenceTransformer,
+    top_k: int = 5,
+):
+
+    # -----------------------------------------------------
+    # SEARCH WIKIPEDIA
+    # -----------------------------------------------------
 
     search_results = wikipedia_search(
         claim,
-        top_k=min(top_k, 3),
+        top_k=3,
     )
 
-    evidence = []
+    # -----------------------------------------------------
+    # COLLECT ALL CANDIDATE SENTENCES
+    # -----------------------------------------------------
+
+    candidates = []
 
     evidence_id = 0
 
@@ -244,26 +362,44 @@ def search_wikipedia(claim: str, top_k: int = 5):
 
         sentences = split_sentences(extract)
 
-        # -------------------------------------------------
-        # LIMIT SENTENCES PER PAGE
-        # -------------------------------------------------
+        for sentence in sentences:
 
-        for sentence in sentences[:3]:
+            candidates.append({
 
-            evidence.append({
                 "page": url_title,
+
                 "display_page": title,
+
                 "sentence_id": evidence_id,
+
                 "text": sentence,
-                "score": 1.0,
+
+                "score": 0.0,
+
                 "rerank_score": None,
+
                 "url": page_url,
             })
 
             evidence_id += 1
 
     print(
-        f"Collected {len(evidence)} evidence sentences"
+        f"Collected {len(candidates)} candidate sentences"
     )
 
-    return evidence
+    # -----------------------------------------------------
+    # SEMANTIC RANKING
+    # -----------------------------------------------------
+
+    ranked_sentences = semantic_rank_sentences(
+        claim=claim,
+        sentences=candidates,
+        model=model,
+        top_k=top_k * 5,
+    )
+
+    print(
+        f"Selected {len(ranked_sentences)} semantic candidates"
+    )
+
+    return ranked_sentences

@@ -15,6 +15,8 @@ export default function App() {
 
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [claimHistory, setClaimHistory] = useState<string[]>([]);
   
   // Interactive Settings State
   const [settings, setSettings] = useState<AppSettings>({
@@ -37,6 +39,10 @@ export default function App() {
         const result = await verifyClaim(claim, settings);
         setVerificationResult(result);
         setShowResult(true);
+        setClaimHistory((prev) => [
+        claim,
+        ...prev.filter((c) => c !== claim),
+        ].slice(0, 10));
     } catch (err) {
         setError("Could not verify claim. Make sure the backend is running.");
     } finally {
@@ -66,6 +72,7 @@ export default function App() {
                 updateSettings={updateSettings}
                 result={verificationResult}
                 error={error}
+                claimHistory={claimHistory}
                 />
             )}
             {activePage === 'settings' && (

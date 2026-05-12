@@ -34,3 +34,16 @@ export async function verifyClaim(
 
   return await response.json();
 }
+
+export async function fetchRandomClaim() {
+
+  const response = await fetch(
+    'http://127.0.0.1:8000/random-claim'
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch random claim')
+  }
+
+  return response.json()
+}

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.backend.pipeline_service import verify_claim
-
+from app.backend.random_claims import get_random_claim
 
 app = FastAPI(title="Claim Verification API")
 
@@ -43,3 +43,8 @@ def verify(request: VerifyRequest):
         retrieval_mode=request.retrieval_mode,
         use_reranker=request.use_reranker,
     )
+
+@app.get("/random-claim")
+def random_claim():
+
+    return get_random_claim()
