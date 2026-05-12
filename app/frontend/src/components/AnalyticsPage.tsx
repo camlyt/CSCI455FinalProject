@@ -101,7 +101,7 @@ export const AnalyticsPage = () => {
               <metric.icon className="w-5 h-5 text-slate-600" />
             </div>
 
-            <div className="text-5xl font-black tracking-tighter text-white mb-3">
+            <div className="text-5xl font-black tracking-tighter text-purple-400 mb-3">
               {metric.value}
             </div>
 
