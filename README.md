@@ -173,6 +173,25 @@ After that, run:
 python run_pipeline.py
 ```
 ---
+
+## Launch the App
+
+Start the backend server from the project root:
+```
+python -m uvicorn app.backend.main:app --reload
+```
+
+Frontend setup (React + Vite)
+Oppen up a new terminal.
+```
+cd app/frontend
+npm isntall
+npm run dev
+```
+The app will be hosted at: http://localhost:3000
+
+
+---
  Pipeline Scripts
 ---
 `build_targeted_subset.py`
@@ -279,6 +298,58 @@ The final reranked pipeline produced 17 errors out of 75 evaluated examples.
 This suggests that retrieval is generally effective, and most remaining errors come from the verifier stage rather than missing evidence.
 
 ---
+## Live Wikipedia Evaluation Pipeline
+
+This project includes an additional experimental “live Wikipedia” evaluation pipeline that tests the claim verification system under more realistic retrieval conditions.
+
+Unlike the standard FEVER evaluation setup — where the verifier receives gold evidence directly from the dataset — this pipeline must first retrieve evidence from live Wikipedia pages before verification occurs.
+
+This makes the task substantially harder and more representative of real-world fact verification systems.
+
+The pipeline is split into two stages:
+
+1. save_live_wikipedia_candidates.py
+    - Loads FEVER training examples
+    - Normalizes claims
+    - Embeds claims using:
+    sentence-transformers/all-MiniLM-L6-v2
+    - Uses semantic retrieval against live Wikipedia
+    - Retrieves top-k evidence candidates
+
+Output:
+data/processed/live_wikipedia_candidates.jsonl
+2. evaluate_live_wikipedia_outputs.py
+
+- loads saved retrieval results
+- runs the verifier
+- computes analytics
+- measures pipeline performance
+
+To recreate, run these files in the order above.
+
+---
+### Wiki Pipeline Result
+| Metric | Value |
+|---|---:|
+| Examples Evaluated | 100 |
+| Overall Accuracy | 43.0% |
+
+### Prediction Distribution
+| Prediction Label | Count |
+|---|---:|
+| NOT ENOUGH INFO | 57 |
+| SUPPORTS | 14 |
+| REFUTES | 29 |
+
+### Per-Label Accuracy
+
+| Gold Label | Accuracy |
+|---|---:|
+| SUPPORTS | 23.2% |
+| REFUTES | 61.9% |
+| NOT ENOUGH INFO | 73.9% |
+
+---
 ## Important Implementation Notes
 ### FAISS normalization
 The project uses NumPy normalization instead of `faiss.normalize_L2()` because `faiss.normalize_L2()` caused local native crashes on macOS.
@@ -359,23 +430,6 @@ evaluate_retrieval_save_outputs.py
 debug_verifier.py
 ```
 They may still be useful for debugging, but the official pipeline is defined in run_pipeline.py.
-
---- 
-## Launch the App
-
-Start the backend server from the project root:
-```
-python -m uvicorn app.backend.main:app --reload
-```
-
-Frontend setup (React + Vite)
-Oppen up a new terminal.
-```
-cd app/frontend
-npm isntall
-npm run dev
-```
-The app will be hosted at: http://localhost:3000
 
 --- 
 ## Limitations
